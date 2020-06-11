@@ -1,70 +1,69 @@
 package reader
 
 import (
-  "os"
-  "path"
-  "fmt"
-  "io"
-  "bufio"
-  "log"
+	"bufio"
+	"io"
+	"log"
+	"os"
+	"path"
 )
 
 //Reader struct
 type Reader struct {
-  Filepath string
-  File *os.File
+	Filepath string
+	File     *os.File
 
-  IsOpened bool
+	IsOpened bool
 
-  filename string
+	filename string
 }
 
 func isExistingFile(filepath string) (bool, error) {
-  _, err := os.Stat(filepath)
-  return os.IsNotExist(err), err
+	_, err := os.Stat(filepath)
+	return os.IsNotExist(err), err
 }
 
 func isReadableFile(filename string) (string, error) {
-  cwd, _ := os.Getwd();
-  filepath := path.Join(cwd, filename);
+	cwd, _ := os.Getwd()
+	filepath := path.Join(cwd, filename)
 
-  status, err := isExistingFile(filepath)
+	status, err := isExistingFile(filepath)
 
-  if status {
-    return "", err
-  }
+	if status {
+		return "", err
+	}
 
-  return filepath, err
+	return filepath, err
 }
 
-func openInputFile(filepath string)  (*os.File){
-  f, err := os.Open(filepath)
+func openInputFile(filepath string) *os.File {
+	f, err := os.Open(filepath)
 
-  if err != nil {
-    fmt.Errorf("Cannot open file")
-  }
+	if err != nil {
+		log.Fatal("Cannot open file")
+	}
 
-  return f
+	return f
 }
 
 //NewReader creates a new reader instance
-func NewReader(filename string) (*Reader) {
-  filepath, err := isReadableFile(filename)
+func NewReader(filename string) *Reader {
+	filepath, err := isReadableFile(filename)
 
-  if err != nil {
-    log.Fatal(err)
-  }
+	if err != nil {
+		log.Fatal(err)
+	}
 
-  fileID := openInputFile(filepath)
+	fileID := openInputFile(filepath)
 
-  return &Reader{
-    Filepath: filepath,
-    File: fileID,
-    IsOpened: true,
-    filename: filename,
-  }
+	return &Reader{
+		Filepath: filepath,
+		File:     fileID,
+		IsOpened: true,
+		filename: filename,
+	}
 }
 
-func (r *Reader) Read() (io.Reader) {
-  return bufio.NewReader(r.File)
+func (r *Reader) Read() io.Reader {
+	return bufio.NewReader(r.File)
 }
