@@ -63,36 +63,31 @@ func (w *Writer) Write() {
 	w.Open()
 	defer w.Close()
 
-	eof := false
-
 	log.Println("writer: starting")
 
 	for {
 		log.Println("writer: started")
 
 		select {
-		case row := <-w.channel:
-			log.Println("writer: receiving")
+		case row, status := <-w.channel:
+			if status {
+				log.Println("writer: receiving")
 
-			concatenateRow := strings.Join(row, w.Options.Separator)
+				concatenateRow := strings.Join(row, w.Options.Separator)
 
-			if strings.Contains(concatenateRow, "EOF") {
-				eof = true
+				fullRow := concatenateRow + w.Options.EndOfLine
+				log.Println("writer: joining", fullRow)
+
+				_, err := w.file.WriteString(fullRow)
+				log.Println("writer: writing")
+
+				if err != nil {
+					log.Fatal(err)
+				}
+			} else {
+				return
 			}
 
-			fullRow := concatenateRow + w.Options.EndOfLine
-			log.Println("writer: joining", fullRow)
-
-			if eof {
-				break
-			}
-
-			_, err := w.file.WriteString(fullRow)
-			log.Println("writer: writing")
-
-			if err != nil {
-				log.Fatal(err)
-			}
 		}
 	}
 

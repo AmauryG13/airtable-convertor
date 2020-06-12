@@ -77,8 +77,9 @@ func (r *Reader) Read() {
 		log.Println("reader: read", row)
 
 		if err == io.EOF {
-			r.channel <- []string{"EOF"}
-			break
+			close(r.channel)
+			log.Println("reader: close channel")
+			return
 		}
 
 		if err != nil {

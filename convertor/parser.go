@@ -43,32 +43,27 @@ func removeChar(record string, toRemovedChars []string) string {
 
 // Parse is the function used to parse content
 func (p *Parser) Parse() {
-	eof := false
 
 	log.Println("parser: starting")
 	for {
 		log.Println("parser: started")
 
 		select {
-		case row := <-p.readChannel:
-			log.Println("parser: received")
+		case row, status := <-p.readChannel:
+			if status {
+				log.Println("parser: received")
 
-			for idx, record := range row {
-				if strings.Contains(record, "EOF") {
-					eof = true
+				for idx, record := range row {
+					row[idx] = removeChar(record, p.ToBeRemoved)
 				}
 
-				row[idx] = removeChar(record, p.ToBeRemoved)
+				log.Println("parser: parse", row)
 
-			}
-
-			log.Println("parser: parse", row)
-
-			p.writeChannel <- row
-			log.Println("parser: sent")
-
-			if eof {
-				break
+				p.writeChannel <- row
+				log.Println("parser: sent")
+			} else {
+				close(p.writeChannel)
+				return
 			}
 		}
 
