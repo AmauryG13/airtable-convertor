@@ -16,3 +16,4 @@
 
 # Tests directory
 tests/
+.DS_Store
