@@ -50,22 +50,21 @@ func (p *Parser) Parse() {
 
 		select {
 		case row, status := <-p.readChannel:
-			if status {
-				log.Println("parser: received")
+			log.Printf("parser: %b received %s \n", status, row)
 
-				for idx, record := range row {
-					row[idx] = removeChar(record, p.ToBeRemoved)
-				}
-
-				log.Println("parser: parse", row)
-
-				p.writeChannel <- row
-				log.Println("parser: sent")
-			} else {
-				close(p.writeChannel)
-				return
+			for idx, record := range row {
+				row[idx] = removeChar(record, p.ToBeRemoved)
 			}
-		}
 
+			log.Println("parser: parse", row)
+
+			p.writeChannel <- row
+			log.Println("parser: sent")
+
+			if !status {
+				break
+			}
+
+		}
 	}
 }

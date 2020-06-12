@@ -26,7 +26,7 @@ func NewReader(filepath string, cRead chan []string) *Reader {
 	status, err := isExistingFile(filepath)
 
 	if status == false {
-		log.Fatal("This file doesn't exist")
+		log.Fatal("This file '", filepath, "' doesn't exist")
 	}
 
 	if err != nil {
@@ -76,18 +76,17 @@ func (r *Reader) Read() {
 		row, err := csvReader.Read()
 		log.Println("reader: read", row)
 
-		if err == io.EOF {
-			close(r.channel)
-			log.Println("reader: close channel")
-			return
-		}
-
-		if err != nil {
-			log.Fatal(err)
+		if err != nil && err != io.EOF {
+			log.Fatal("reading error:", err)
 		}
 
 		r.channel <- row
 		log.Println("reader: sent")
+
+		if err == io.EOF {
+			log.Println("reader: close channel")
+			break
+		}
 	}
 }
 

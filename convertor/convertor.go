@@ -87,7 +87,7 @@ func New(filePath string, addChars []string, options map[string]string) *Convert
 
 // Run is running conversion logic
 func (c *Convertor) Run() {
-	go c.parser.Parse()
 	go c.writer.Write()
+	go c.parser.Parse()
 	c.reader.Read()
 }

@@ -70,24 +70,23 @@ func (w *Writer) Write() {
 
 		select {
 		case row, status := <-w.channel:
-			if status {
-				log.Println("writer: receiving")
+			log.Printf("writer: %s received %s \n", status, row)
 
-				concatenateRow := strings.Join(row, w.Options.Separator)
+			concatenateRow := strings.Join(row, w.Options.Separator)
 
-				fullRow := concatenateRow + w.Options.EndOfLine
-				log.Println("writer: joining", fullRow)
+			fullRow := concatenateRow + w.Options.EndOfLine
+			log.Println("writer: joining", fullRow)
 
-				_, err := w.file.WriteString(fullRow)
-				log.Println("writer: writing")
+			_, err := w.file.WriteString(fullRow)
+			log.Println("writer: writing")
 
-				if err != nil {
-					log.Fatal(err)
-				}
-			} else {
-				return
+			if err != nil {
+				log.Fatal("writing error: ", err)
 			}
 
+			if !status {
+				break
+			}
 		}
 	}
 
