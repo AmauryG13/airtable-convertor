@@ -12,8 +12,13 @@ type Convertor struct {
 	Output   string
 	Info     *Info
 	Channels map[string]chan []string
+
+	reader *Reader
+	parser *Parser
+	writer *Writer
 }
 
+// Info is the struct providing some info on path
 type Info struct {
 	Dir       string
 	Filename  string
@@ -59,10 +64,22 @@ func NewConvertor(filePath string, addChars []string, options map[string]string)
 	oFileName := file[:len(file)-len(ext)] + "_" + addOnOutToken + ext
 	oFilePath := filepath.Join(dir, oFileName)
 
+	convertorChan := newChannels()
+
 	return &Convertor{
 		Input:    iFilePath,
 		Output:   oFilePath,
 		Info:     cInfo,
-		Channels: newChannels(),
+		Channels: convertorChan,
+		reader:   NewReader(iFilePath, convertorChan["read"]),
+		parser:   NewParser(addChars, convertorChan),
+		writer:   NewWriter(oFilePath, options, convertorChan["write"]),
 	}
+}
+
+// Run is running conversion logic
+func (c *Convertor) Run() {
+	go c.reader.Read()
+	go c.parser.Parse()
+	go c.writer.Write()
 }
