@@ -17,7 +17,8 @@ type Reader struct {
 
 func isExistingFile(filepath string) (bool, error) {
 	_, err := os.Stat(filepath)
-	return os.IsNotExist(err), err
+
+	return !os.IsNotExist(err), err
 }
 
 //NewReader creates a new reader instance
@@ -72,6 +73,7 @@ func (r *Reader) Read() {
 		row, err := csvReader.Read()
 
 		if err == io.EOF {
+			r.channel <- []string{"EOF"}
 			break
 		}
 
@@ -87,7 +89,7 @@ func (r *Reader) Read() {
 func (r *Reader) Close() {
 	err := r.getFileID().Close()
 
-	if err == nil {
+	if err != nil {
 		log.Fatal(err)
 	}
 }
