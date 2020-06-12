@@ -20,13 +20,15 @@ type Convertor struct {
 
 // Info is the struct providing some info on path
 type Info struct {
+	Base      string
 	Dir       string
 	Filename  string
 	Extension string
 }
 
-func newInfo(dir string, name string, ext string) *Info {
+func newInfo(base string, dir string, name string, ext string) *Info {
 	return &Info{
+		Base:      base,
 		Dir:       dir,
 		Filename:  name,
 		Extension: ext,
@@ -42,27 +44,36 @@ func newChannels() map[string]chan []string {
 	return Channels
 }
 
+func handlePath(dir string) (string, string) {
+	if !filepath.IsAbs(dir) {
+		base, err := os.Getwd()
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		return base, dir
+	} else {
+		base := dir
+		dir = ""
+
+		return base, dir
+	}
+}
+
 // NewConvertor is creating a new convertor
 func NewConvertor(filePath string, addChars []string, options map[string]string) *Convertor {
-	dir, file := filepath.Split(filePath)
-
-	if dir == "" {
-		cwd, cwdErr := os.Getwd()
-		dir = cwd
-
-		if cwdErr == nil {
-			log.Fatal(cwdErr)
-		}
-	}
+	path, file := filepath.Split(filePath)
+	base, dir := handlePath(path)
 
 	ext := filepath.Ext(file)
 
-	cInfo := newInfo(dir, file, ext)
+	cInfo := newInfo(base, dir, file, ext)
 
-	iFilePath := filepath.Join(dir, file)
+	iFilePath := filepath.Join(base, dir, file)
 
 	oFileName := file[:len(file)-len(ext)] + "_" + addOnOutToken + ext
-	oFilePath := filepath.Join(dir, oFileName)
+	oFilePath := filepath.Join(base, dir, oFileName)
 
 	convertorChan := newChannels()
 
