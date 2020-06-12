@@ -36,7 +36,7 @@ func newInfo(base string, dir string, name string, ext string) *Info {
 }
 
 func newChannels() map[string]chan []string {
-	var Channels map[string]chan []string
+	Channels := make(map[string]chan []string)
 
 	Channels["read"] = make(chan []string)
 	Channels["write"] = make(chan []string)
@@ -53,16 +53,13 @@ func handlePath(dir string) (string, string) {
 		}
 
 		return base, dir
-	} else {
-		base := dir
-		dir = ""
-
-		return base, dir
 	}
+
+	return dir, ""
 }
 
-// NewConvertor is creating a new convertor
-func NewConvertor(filePath string, addChars []string, options map[string]string) *Convertor {
+// New is creating a new convertor
+func New(filePath string, addChars []string, options map[string]string) *Convertor {
 	path, file := filepath.Split(filePath)
 	base, dir := handlePath(path)
 
