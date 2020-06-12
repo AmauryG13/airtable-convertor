@@ -63,15 +63,28 @@ func (w *Writer) Write() {
 	w.Open()
 	defer w.Close()
 
-	row := <-w.channel
+	eof := false
 
-	concatenateRow := strings.Join(row, w.Options.Separator)
-	fullRow := concatenateRow + w.Options.EndOfLine
+	for {
+		row := <-w.channel
 
-	_, err := w.file.WriteString(fullRow)
+		concatenateRow := strings.Join(row, w.Options.Separator)
 
-	if err != nil {
-		log.Fatal(err)
+		if strings.Contains(concatenateRow, "EOF") {
+			eof = true
+		}
+
+		fullRow := concatenateRow + w.Options.EndOfLine
+
+		if eof {
+			break
+		}
+
+		_, err := w.file.WriteString(fullRow)
+
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 
 }
