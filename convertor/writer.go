@@ -65,25 +65,34 @@ func (w *Writer) Write() {
 
 	eof := false
 
+	log.Println("writer: starting")
+
 	for {
-		row := <-w.channel
+		log.Println("writer: started")
 
-		concatenateRow := strings.Join(row, w.Options.Separator)
+		select {
+		case row := <-w.channel:
+			log.Println("writer: receiving")
 
-		if strings.Contains(concatenateRow, "EOF") {
-			eof = true
-		}
+			concatenateRow := strings.Join(row, w.Options.Separator)
 
-		fullRow := concatenateRow + w.Options.EndOfLine
+			if strings.Contains(concatenateRow, "EOF") {
+				eof = true
+			}
 
-		if eof {
-			break
-		}
+			fullRow := concatenateRow + w.Options.EndOfLine
+			log.Println("writer: joining", fullRow)
 
-		_, err := w.file.WriteString(fullRow)
+			if eof {
+				break
+			}
 
-		if err != nil {
-			log.Fatal(err)
+			_, err := w.file.WriteString(fullRow)
+			log.Println("writer: writing")
+
+			if err != nil {
+				log.Fatal(err)
+			}
 		}
 	}
 

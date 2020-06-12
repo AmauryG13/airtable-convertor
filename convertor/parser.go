@@ -1,6 +1,7 @@
 package convertor
 
 import (
+	"log"
 	"strings"
 )
 
@@ -44,21 +45,32 @@ func removeChar(record string, toRemovedChars []string) string {
 func (p *Parser) Parse() {
 	eof := false
 
+	log.Println("parser: starting")
 	for {
-		row := <-p.readChannel
+		log.Println("parser: started")
 
-		for idx, record := range row {
-			if strings.Contains(record, "EOF") {
-				eof = true
+		select {
+		case row := <-p.readChannel:
+			log.Println("parser: received")
+
+			for idx, record := range row {
+				if strings.Contains(record, "EOF") {
+					eof = true
+				}
+
+				row[idx] = removeChar(record, p.ToBeRemoved)
+
 			}
 
-			row[idx] = removeChar(record, p.ToBeRemoved)
+			log.Println("parser: parse", row)
+
+			p.writeChannel <- row
+			log.Println("parser: sent")
+
+			if eof {
+				break
+			}
 		}
 
-		p.writeChannel <- row
-
-		if eof {
-			break
-		}
 	}
 }

@@ -38,6 +38,7 @@ func TestReader(t *testing.T) {
 
 		eof := false
 		for {
+
 			for _, record := range <-readChan {
 				if strings.Contains(record, "EOF") {
 					eof = true

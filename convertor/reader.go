@@ -69,8 +69,12 @@ func (r *Reader) Read() {
 	buffer := r.buffery()
 	csvReader := csv.NewReader(buffer)
 
+	log.Println("reader: starting")
 	for {
+		log.Println("reader: started")
+
 		row, err := csvReader.Read()
+		log.Println("reader: read", row)
 
 		if err == io.EOF {
 			r.channel <- []string{"EOF"}
@@ -82,6 +86,7 @@ func (r *Reader) Read() {
 		}
 
 		r.channel <- row
+		log.Println("reader: sent")
 	}
 }
 
