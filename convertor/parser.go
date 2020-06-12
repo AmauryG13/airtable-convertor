@@ -42,12 +42,23 @@ func removeChar(record string, toRemovedChars []string) string {
 
 // Parse is the function used to parse content
 func (p *Parser) Parse() {
+	eof := false
 
-	row := <-p.readChannel
+	for {
+		row := <-p.readChannel
 
-	for idx, value := range row {
-		row[idx] = removeChar(value, p.ToBeRemoved)
+		for idx, record := range row {
+			if strings.Contains(record, "EOF") {
+				eof = true
+			}
+
+			row[idx] = removeChar(record, p.ToBeRemoved)
+		}
+
+		p.writeChannel <- row
+
+		if eof {
+			break
+		}
 	}
-
-	p.writeChannel <- row
 }
