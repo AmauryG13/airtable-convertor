@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"sync"
 )
 
 // Convertor is the main struct
@@ -87,7 +88,10 @@ func New(filePath string, addChars []string, options map[string]string) *Convert
 
 // Run is running conversion logic
 func (c *Convertor) Run() {
-	go c.writer.Write()
-	go c.parser.Parse()
-	c.reader.Read()
+	var end sync.WaitGroup
+	end.Add(2)
+
+	go c.writer.Write(&end)
+	go c.parser.Parse(&end)
+	c.reader.Read(&end)
 }

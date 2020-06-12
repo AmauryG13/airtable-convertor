@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"sync"
 )
 
 //Reader struct
@@ -62,7 +63,7 @@ func (r *Reader) buffery() io.Reader {
 	return bufio.NewReader(r.getFileID())
 }
 
-func (r *Reader) Read() {
+func (r *Reader) Read(wg *sync.WaitGroup) {
 	r.Open()
 	defer r.Close()
 
@@ -84,6 +85,7 @@ func (r *Reader) Read() {
 		log.Println("reader: sent")
 
 		if err == io.EOF {
+			wg.Wait()
 			log.Println("reader: close channel")
 			break
 		}

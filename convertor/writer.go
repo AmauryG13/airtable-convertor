@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 	"strings"
+	"sync"
 )
 
 // Writer is holding the writing logic
@@ -59,7 +60,7 @@ func (w *Writer) Open() {
 }
 
 // Write is writing row to the new file
-func (w *Writer) Write() {
+func (w *Writer) Write(wg *sync.WaitGroup) {
 	w.Open()
 	defer w.Close()
 
@@ -69,8 +70,12 @@ func (w *Writer) Write() {
 		log.Println("writer: started")
 
 		select {
-		case row, status := <-w.channel:
-			log.Printf("writer: %s received %s \n", status, row)
+		case row := <-w.channel:
+			log.Printf("writer: received %s \n", row)
+
+			if row == nil {
+				wg.Done()
+			}
 
 			concatenateRow := strings.Join(row, w.Options.Separator)
 
@@ -82,10 +87,6 @@ func (w *Writer) Write() {
 
 			if err != nil {
 				log.Fatal("writing error: ", err)
-			}
-
-			if !status {
-				break
 			}
 		}
 	}

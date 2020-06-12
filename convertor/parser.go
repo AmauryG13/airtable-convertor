@@ -3,6 +3,7 @@ package convertor
 import (
 	"log"
 	"strings"
+	"sync"
 )
 
 // Parser is the struct holding logic
@@ -42,15 +43,19 @@ func removeChar(record string, toRemovedChars []string) string {
 }
 
 // Parse is the function used to parse content
-func (p *Parser) Parse() {
+func (p *Parser) Parse(wg *sync.WaitGroup) {
 
 	log.Println("parser: starting")
 	for {
 		log.Println("parser: started")
 
 		select {
-		case row, status := <-p.readChannel:
-			log.Printf("parser: %b received %s \n", status, row)
+		case row := <-p.readChannel:
+			log.Printf("parser: received %s \n", row)
+
+			if row == nil {
+				wg.Done()
+			}
 
 			for idx, record := range row {
 				row[idx] = removeChar(record, p.ToBeRemoved)
@@ -60,11 +65,6 @@ func (p *Parser) Parse() {
 
 			p.writeChannel <- row
 			log.Println("parser: sent")
-
-			if !status {
-				break
-			}
-
 		}
 	}
 }
