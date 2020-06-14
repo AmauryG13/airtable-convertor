@@ -2,7 +2,7 @@ package convertor
 
 import (
 	"fmt"
-	"strings"
+	"sync"
 	"testing"
 )
 
@@ -34,22 +34,23 @@ func TestReader(t *testing.T) {
 
 		reader := NewReader(filepath, readChan)
 
-		go reader.Read()
+		var wg sync.WaitGroup
+		wg.Add(1)
 
-		eof := false
+		go reader.Read(&wg)
+
+	loop:
 		for {
-
-			for _, record := range <-readChan {
-				if strings.Contains(record, "EOF") {
-					eof = true
-					break
+			select {
+			case row, status := <-readChan:
+				if !status {
+					wg.Done()
+					break loop
 				}
 
-				fmt.Println(record)
-			}
-
-			if eof {
-				break
+				for _, record := range row {
+					fmt.Println(record)
+				}
 			}
 		}
 	})

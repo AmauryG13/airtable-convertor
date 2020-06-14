@@ -66,15 +66,17 @@ func (w *Writer) Write(wg *sync.WaitGroup) {
 
 	log.Println("writer: starting")
 
+loop:
 	for {
 		log.Println("writer: started")
 
 		select {
-		case row := <-w.channel:
-			log.Printf("writer: received %s \n", row)
+		case row, status := <-w.channel:
+			log.Println("writer: (", status, ") read", row)
 
-			if row == nil {
+			if status == false {
 				wg.Done()
+				break loop
 			}
 
 			concatenateRow := strings.Join(row, w.Options.Separator)

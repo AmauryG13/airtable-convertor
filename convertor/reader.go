@@ -77,18 +77,20 @@ func (r *Reader) Read(wg *sync.WaitGroup) {
 		row, err := csvReader.Read()
 		log.Println("reader: read", row)
 
-		if err != nil && err != io.EOF {
+		if err == io.EOF {
+			close(r.channel)
+			log.Println("reader: close channel")
+
+			wg.Wait()
+			break
+		}
+
+		if err != nil {
 			log.Fatal("reading error:", err)
 		}
 
 		r.channel <- row
 		log.Println("reader: sent")
-
-		if err == io.EOF {
-			wg.Wait()
-			log.Println("reader: close channel")
-			break
-		}
 	}
 }
 

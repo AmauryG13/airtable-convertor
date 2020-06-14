@@ -46,15 +46,20 @@ func removeChar(record string, toRemovedChars []string) string {
 func (p *Parser) Parse(wg *sync.WaitGroup) {
 
 	log.Println("parser: starting")
+
+loop:
 	for {
 		log.Println("parser: started")
 
 		select {
-		case row := <-p.readChannel:
-			log.Printf("parser: received %s \n", row)
+		case row, status := <-p.readChannel:
+			log.Println("parser: (", status, ") read", row)
 
-			if row == nil {
+			if status == false {
 				wg.Done()
+
+				close(p.writeChannel)
+				break loop
 			}
 
 			for idx, record := range row {
