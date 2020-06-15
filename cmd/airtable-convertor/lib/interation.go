@@ -1,9 +1,11 @@
 package lib
 
 import (
+	"bufio"
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 // Interaction is holding some var for creating interaction
@@ -23,12 +25,14 @@ func NewInteraction() *Interaction {
 func (i *Interaction) AskForInput() string {
 	exePath, _ := os.Executable()
 	cwd := filepath.Dir(exePath)
+
 	fmt.Printf("Filepath is not filled in. Actual path : %q\n", cwd)
 	fmt.Println("Enter the path to file:")
 
-	var input string
-	fmt.Scanln(&input)
-	return filepath.Join(cwd, input)
+	reader := bufio.NewReader(i.Input)
+	input, _ := reader.ReadString('\n')
+
+	return filepath.Join(cwd, strings.ReplaceAll(input, "\n", ""))
 }
 
 // Notify is a commun func to log some actions taken by the script
