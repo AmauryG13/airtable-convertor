@@ -20,10 +20,14 @@ En plaçant le script dans le même dossier que le fichier à convertir (fichier
 
 L'exécutable peut prendre en ligne de commande 4 arguments : 1 obligatoire et 3 optionnels
 
-- ```filepath```: le chemin vers le fichier à convertir
-- ```-eol ```: le caractère de saut de ligne (par défaut "\n")
-- ```-sep ```: le caractère de séparation des données (par défaut ";")
-- ```-uwc```: une liste (séparéé par des virgules) de caractère à enlever (en plus des caratèses de base)
+- ``` filepath ```: le chemin vers le fichier à convertir
+- ``` -eol ```: le caractère de saut de ligne (par défaut "\n")
+- ``` -sep ```: le caractère de séparation des données (par défaut ";")
+- ``` -uwc```: une liste (séparéé par des virgules) de caractère à enlever (en plus des caratèses de base)
+
++ 1 paramètres :
+
+- ``` -h ```: pour afficher l'aide
 
 ### Interaction
 
