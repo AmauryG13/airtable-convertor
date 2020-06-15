@@ -3,8 +3,10 @@ package lib
 import (
 	"bufio"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 )
 
@@ -30,9 +32,21 @@ func (i *Interaction) AskForInput() string {
 	fmt.Println("Enter the path to file:")
 
 	reader := bufio.NewReader(i.Input)
-	input, _ := reader.ReadString('\n')
+	input, err := reader.ReadString('\n')
 
-	return filepath.Join(cwd, strings.ReplaceAll(input, "\n", ""))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var newInput string
+
+	if runtime.GOOS == "windows" {
+		newInput = strings.ReplaceAll(input, "\r\n", "")
+	} else {
+		newInput = strings.ReplaceAll(input, "\n", "")
+	}
+
+	return filepath.Join(cwd, newInput)
 }
 
 // Notify is a commun func to log some actions taken by the script
