@@ -45,7 +45,6 @@ func init() {
 	flag.StringVar(&eol, "eol", "\n", "Default end of line character")
 	flag.Var(&uwcFlag, "uwc", "Additional (comma separated) unwanted chars to removed")
 	flag.BoolVar(&help, "h", false, "Display help")
-	flag.BoolVar(&verbose, "v", false, "Display verbose debug info")
 }
 
 func main() {
@@ -54,6 +53,10 @@ func main() {
 	flag.Parse()
 
 	interaction.Notify("context", [5]string{"sep", "eol", "uwc", "help", "verbose"}, sep, eol, uwcFlag, help, verbose)
+
+	if help {
+		fnUsage()
+	}
 
 	if flag.NArg() == 1 {
 		filepath = flag.Args()[0]
