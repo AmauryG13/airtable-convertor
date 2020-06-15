@@ -3,6 +3,7 @@ package lib
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 )
 
 // Interaction is holding some var for creating interaction
@@ -20,12 +21,14 @@ func NewInteraction() *Interaction {
 
 // AskForInput is asking the user for a filename if it's not in func args
 func (i *Interaction) AskForInput() string {
-	fmt.Println("Filepath is not filled in")
+	exePath, _ := os.Executable()
+	cwd := filepath.Dir(exePath)
+	fmt.Printf("Filepath is not filled in. Actual path : %q\n", cwd)
 	fmt.Println("Enter the path to file:")
 
 	var input string
 	fmt.Scanln(&input)
-	return input
+	return filepath.Join(cwd, input)
 }
 
 // Notify is a commun func to log some actions taken by the script
