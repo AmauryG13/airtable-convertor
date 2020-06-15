@@ -7,7 +7,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/amauryg13/airtable-convertor-go/convertor"
+	"github.com/amauryg13/airtable-convertor/cmd/airtable-convertor/lib"
+	"github.com/amauryg13/airtable-convertor/convertor"
 )
 
 var fnUsage = func() {
@@ -36,21 +37,28 @@ var filepath string
 var sep string
 var eol string
 var uwcFlag uwc
+var help bool
+var verbose bool
 
 func init() {
 	flag.StringVar(&sep, "sep", ";", "Default record separator")
 	flag.StringVar(&eol, "eol", "\n", "Default end of line character")
 	flag.Var(&uwcFlag, "uwc", "Additional (comma separated) unwanted chars to removed")
+	flag.BoolVar(&help, "h", false, "Display help")
+	flag.BoolVar(&verbose, "v", false, "Display verbose debug info")
 }
 
 func main() {
+	interaction := lib.NewInteraction()
+
 	flag.Parse()
+
+	interaction.Notify("context", [5]string{"sep", "eol", "uwc", "help", "verbose"}, sep, eol, uwcFlag, help, verbose)
 
 	if flag.NArg() == 1 {
 		filepath = flag.Args()[0]
 	} else {
-		fnUsage()
-		os.Exit(1)
+		filepath = interaction.AskForInput()
 	}
 
 	removedChars := uwcFlag
@@ -60,5 +68,8 @@ func main() {
 	options["sep"] = sep
 
 	c := convertor.New(filepath, removedChars, options)
+
+	interaction.Notify("start", c.Input)
 	c.Run()
+	interaction.Notify("end", c.Output)
 }
